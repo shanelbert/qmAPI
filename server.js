@@ -14,7 +14,7 @@ const pool = new Pool({
 // function isValid(req, requiredAttribute) {
 //   let valid;
 //   requiredAttribute.every((val) => {
-//     valid = ((req.query[val] !== undefined) && (req.query[val] !== ""));
+//     valid = ((req.query[val] !== undefined) && (req.query[val] !== ''));
 //     return valid;
 //   });
 // }
@@ -23,26 +23,26 @@ express()
   .use(bodyParser.json())
   .use((req, res, next) => {
     res.header(
-      "Access-Control-Allow-Origin",
-      "http://localhost:3000"
+      'Access-Control-Allow-Origin',
+      'http://localhost:3000'
     );
     res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept"
+      'Access-Control-Allow-Headers',
+      'Origin, X-Requested-With, Content-Type, Accept'
     );
     res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE')
     next();
   })
 	.post('/pengantri', (req, res) => {
     pool.connect().then((client) => {
-      return client.query("INSERT INTO pengantri (namawakil, jumlah, waktumulai) SELECT $1, $2, (current_time at time zone 'cxt')::TIME(0);", [req.body.namawakil, req.body.jumlah])
+      return client.query('INSERT INTO pengantri (namawakil, jumlah, waktumulai) SELECT $1, $2, (current_time at time zone 'cxt')::TIME(0);', [req.body.namawakil, req.body.jumlah])
         .then(() => {
           client.release();
           res.status(200).send('Pengantri berhasil ditambahkan');
         }).catch((err) => {
           client.release();
           console.log(err.stack);
-          res.status(500).send("Pengantri gagal ditambahkan");
+          res.status(500).send('Pengantri gagal ditambahkan');
         })
     })
 	})
@@ -56,7 +56,7 @@ express()
           .catch(err => {
             client.release();
             console.log(err.stack);
-            res.status(500).send("Data pengantri gagal diperoleh");
+            res.status(500).send('Data pengantri gagal diperoleh');
           })
       })
 	})
@@ -87,34 +87,34 @@ express()
   })
 	.get('/meja', (req, res) => {
     pool.connect().then((client) => {
-      return client.query("SELECT * FROM meja")
+      return client.query('SELECT * FROM meja')
         .then((result) => {
           client.release();
           res.json(result.rows);
         }).catch((err) => {
           client.release();
           console.log(err.stack);
-          res.status(500).send("Data meja gagal diperoleh");
+          res.status(500).send('Data meja gagal diperoleh');
         })
     })
 	})
   .put('/meja/kosong', (req, res) => {
     pool.connect().then((client) => {
-      return client.query("UPDATE meja SET status = false WHERE id = $2 AND kapasitas = $3", [req.query.id, req.query.kapasitas])
+      return client.query('UPDATE meja SET status = false WHERE id = $2 AND kapasitas = $3', [req.query.id, req.query.kapasitas])
         .then(() => {
           client.release();
           res.status(200).send(`Status meja ${req.query.id} berhasil diganti`);
         }).catch((err) => {
           client.release()
           console.log(err.stack);
-          res.status(500).send("Status meja gagal diganti");
+          res.status(500).send('Status meja gagal diganti');
         })
     })
   })
   .put('/meja', (req, res) => {
     let query = `UPDATE meja SET status = ${req.body.status} WHERE `;
     if (req.body.meja.length === 0) {
-      res.status(200).send("Tidak ada meja yang statusnya diubah");
+      res.status(200).send('Tidak ada meja yang statusnya diubah');
     } else {
       query += `(id = ${req.body.meja[0].id} AND kapasitas = ${req.body.meja[0].kapasitas})`
       for (let i=1; i<=req.body.meja.length-1; i++) {
@@ -129,7 +129,7 @@ express()
         }).catch((err) => {
           client.release()
           console.log(err.stack);
-          res.status(500).send("Status meja gagal diganti");
+          res.status(500).send('Status meja gagal diganti');
         })
     })
   })
