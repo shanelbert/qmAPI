@@ -49,15 +49,15 @@ express()
         return client.query("INSERT INTO pengantri (namawakil, jumlah, waktumulai) SELECT $1, $2, (current_time at time zone 'cxt')::TIME(0);", [req.body.namawakil, req.body.jumlah])
           .then(() => {
             client.release();
-            res.status(200).send('Pengantri berhasil ditambahkan');
+            res.status(200).json('Pengantri berhasil ditambahkan');
           }).catch((err) => {
             client.release();
             console.log(err.stack);
-            res.status(500).send('Pengantri gagal ditambahkan');
+            res.status(500).json('Pengantri gagal ditambahkan');
           })
       })
     } else {
-      res.status(400).send("Request body tidak lengkap");
+      res.status(400).json("Request body tidak lengkap");
     }
 	})
   .get('/pengantri', (req, res) => {
@@ -70,7 +70,7 @@ express()
           .catch(err => {
             client.release();
             console.log(err.stack);
-            res.status(500).send('Data pengantri gagal diperoleh');
+            res.status(500).json('Data pengantri gagal diperoleh');
           })
       })
 	})
@@ -82,13 +82,13 @@ express()
             if (rescount.rows[0].count === '0') {
               client.query('ALTER SEQUENCE pengantri_id_seq RESTART WITH 1;').then(() => {
                 client.release();
-                res.status(200).send(`Pengantri ${req.query.id} berhasil dihapus`);
+                res.status(200).json(`Pengantri ${req.query.id} berhasil dihapus`);
               }).catch(err => {
                 throw err;
               });
             } else {
               client.release();
-              res.status(200).send(`Pengantri ${req.query.id} berhasil dihapus`);
+              res.status(200).json(`Pengantri ${req.query.id} berhasil dihapus`);
             }
           }).catch(err => {
             throw err;
@@ -96,11 +96,11 @@ express()
         }).catch(err => {
           client.release();
           console.log(err.stack);
-          res.status(500).send(`Pengantri ${req.query.id} gagal dihapus`);
+          res.status(500).json(`Pengantri ${req.query.id} gagal dihapus`);
         })
       })
     } else {
-      res.status(400).send("Request body tidak lengkap");
+      res.status(400).json("Request body tidak lengkap");
     }
   })
 	.get('/meja', (req, res) => {
@@ -112,7 +112,7 @@ express()
         }).catch((err) => {
           client.release();
           console.log(err.stack);
-          res.status(500).send('Data meja gagal diperoleh');
+          res.status(500).json('Data meja gagal diperoleh');
         })
     })
 	})
@@ -120,7 +120,7 @@ express()
     if (isBodyValid(req, ['status', 'meja'])) {
       let query = `UPDATE meja SET status = ${req.body.status} WHERE `;
       if (req.body.meja.length === 0) {
-        res.status(200).send('Tidak ada meja yang statusnya diubah');
+        res.status(200).json('Tidak ada meja yang statusnya diubah');
       } else {
         query += `(id = ${req.body.meja[0].id} AND kapasitas = ${req.body.meja[0].kapasitas})`
         for (let i=1; i<=req.body.meja.length-1; i++) {
@@ -131,15 +131,15 @@ express()
         return client.query(query)
           .then(() => {
             client.release();
-            res.status(200).send(`Status meja berhasil diganti`);
+            res.status(200).json(`Status meja berhasil diganti`);
           }).catch((err) => {
             client.release()
             console.log(err.stack);
-            res.status(500).send('Status meja gagal diganti');
+            res.status(500).json('Status meja gagal diganti');
           })
       })
     } else {
-      res.status(400).send("Request body tidak lengkap");
+      res.status(400).json("Request body tidak lengkap");
     }
   })
 	.listen(PORT, () => console.log(`Listening on ${PORT}`));
