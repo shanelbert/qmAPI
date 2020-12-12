@@ -19,8 +19,11 @@
   },
   "homepage": "https://github.com/shanelbert/qmAPI#readme",
   "dependencies": {
+    "axios": "^0.21.0",
     "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "googleapis": "^66.0.0",
     "pg": "^8.5.1"
   },
   "devDependencies": {
