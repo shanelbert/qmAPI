@@ -86,7 +86,7 @@ express()
     );
     res.header(
       'Access-Control-Allow-Headers',
-      'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+      'Content-Type, Authorization'
     );
     res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS')
 
@@ -129,7 +129,7 @@ express()
       next();
     }
   })
-  .get('/auth', (req, res) => {
+  .get('/peran', (req, res) => {
     pool.connect().then((client) => {
       return client.query('SELECT peran FROM karyawan WHERE email = $1', [req.userEmail]).then((result) => {
         client.release();
@@ -185,8 +185,8 @@ express()
           client.release();
           console.log(err.stack);
           res.status(500).json('Karyawan gagal ditambahkan');
-        })
-      })
+        });
+      });
     } else {
       res.status(400).json('Request body tidak lengkap');
     }
