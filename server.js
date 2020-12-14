@@ -80,6 +80,25 @@ function getGoogleUserInfo(access_token) {
 express()
   .use(bodyParser.json())
   .use((req, res, next) => {
+    let excludedPaths = ['/favicon.ico', '/log'];
+
+    if (!excludedPaths.includes(req.path)) {
+      res.on('finish', () => {
+        pool.connect().then((client) => {
+          let query = `INSERT INTO log (timestamp, endpoint, method, status_code) VALUES (NOW() AT TIME ZONE 'cxt', $1, $2, $3)`;
+          
+          return client.query(query, [req.path, req.method, res.statusCode]).then(() => {
+            client.release();
+          }).catch((err) => {
+            client.release();
+            console.log(err.stack);
+          });
+        });
+      });
+    }
+    next();
+  })
+  .use((req, res, next) => {
     res.header(
       'Access-Control-Allow-Origin',
       'http://localhost:3000'
@@ -97,8 +116,10 @@ express()
     next();
   })
   .use((req, res, next) => {
-    if (req.path !== '/token' && req.path !== '/url' && req.path !== '/karyawan') {
-      if (!req.headers.authorization || req.headers.authorization.indexOf('Bearer ') === -1) {
+    let excludedPaths = ['/token', '/url', '/karyawan', '/log'];
+
+    if (!excludedPaths.includes(req.path)) {
+      if (!req.headers.authorization || !req.headers.authorization.includes('Bearer ')) {
         res.status(401).json('Authorization header tidak ada');
       } else {
         let access_token = req.headers.authorization.split(' ')[1];
@@ -114,7 +135,6 @@ express()
                 res.status(401).json('Token sudah expired');
               } else {
                 client.release();
-                req.userEmail = result.rows[0].email; 
                 next();
               }
             }
@@ -130,8 +150,10 @@ express()
     }
   })
   .get('/peran', (req, res) => {
+    let access_token = req.headers.authorization.split(' ')[1];
+
     pool.connect().then((client) => {
-      return client.query('SELECT peran FROM karyawan WHERE email = $1', [req.userEmail]).then((result) => {
+      return client.query('SELECT peran FROM karyawan WHERE access_token = $1', [access_token]).then((result) => {
         client.release();
         res.status(200).json(result.rows[0].peran);
       }).catch((err) => {
@@ -190,6 +212,18 @@ express()
     } else {
       res.status(400).json('Request body tidak lengkap');
     }
+  })
+  .get('/log', (req, res) => {
+    pool.connect().then((client) => {
+      return client.query('SELECT * FROM log ORDER BY id DESC LIMIT 10').then((result) => {
+        client.release();
+        res.status(200).json(result.rows);
+      }).catch(err => {
+        client.release();
+        console.log(err.stack);
+        res.status(500).json('Data log gagal diperoleh');
+      });
+    });
   })
   .post('/pengantri', (req, res) => {
     if (isBodyValid(req, ['namawakil', 'jumlah'])) {
