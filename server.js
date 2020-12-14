@@ -44,6 +44,7 @@ function isBodyValid(req, requiredAttribute) {
 let clientId = process.env.CLIENT_ID;
 let clientSecret = process.env.CLIENT_SECRET;
 let redirectURI = process.env.REDIRECT_URI;
+let frontendURI = process.env.FRONT_END_URI;
 const oauth2Client = new google.auth.OAuth2(
   clientId,
   clientSecret,
@@ -102,7 +103,7 @@ express()
   .use((req, res, next) => {
     res.header(
       'Access-Control-Allow-Origin',
-      'http://localhost:3000'
+      frontendURI
     );
     res.header(
       'Access-Control-Allow-Headers',
@@ -141,7 +142,7 @@ express()
             }
           }).catch((err) => {
             client.release();
-            // console.log(err);
+            console.log(err);
             return res.status(500).json('Data token gagal diperoleh');
           })
         })
