@@ -43,10 +43,11 @@ function isBodyValid(req, requiredAttribute) {
 
 let clientId = process.env.CLIENT_ID;
 let clientSecret = process.env.CLIENT_SECRET;
+let redirectURI = process.env.REDIRECT_URI;
 const oauth2Client = new google.auth.OAuth2(
   clientId,
   clientSecret,
-  'http://localhost:3000',
+  redirectURI,
 );
 
 function getGoogleAuthURL() {
